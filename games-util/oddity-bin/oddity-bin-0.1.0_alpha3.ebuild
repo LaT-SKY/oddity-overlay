@@ -8,8 +8,8 @@ inherit desktop optfeature xdg
 DESCRIPTION="Native Linux launcher for Neverness To Everness"
 HOMEPAGE="https://github.com/LaT-SKY/Oddity"
 
-MY_PV="0.1.0-alpha.2"
-SRC_URI="https://github.com/LaT-SKY/Oddity/releases/download/oddity-v0.1.0-alpha.2/oddity-0.1.0-alpha.2-linux-x86_64.tar.gz"
+MY_PV="0.1.0-alpha.3"
+SRC_URI="https://github.com/LaT-SKY/Oddity/releases/download/oddity-v0.1.0-alpha.3/oddity-0.1.0-alpha.3-linux-x86_64.tar.gz"
 S="${WORKDIR}/oddity-${MY_PV}-linux-x86_64"
 
 LICENSE="GPL-3+"
@@ -22,11 +22,16 @@ RDEPEND="
 	app-accessibility/at-spi2-core
 	app-crypt/libsecret
 	dev-libs/glib:2
-	dev-libs/libayatana-appindicator
 	dev-util/desktop-file-utils
 	gnome-base/librsvg
-	net-libs/libsoup:3.0
-	net-libs/webkit-gtk:4.1
+	virtual/libudev
+	media-libs/alsa-lib
+	media-libs/libpulse
+	dev-libs/nss
+	media-libs/mesa
+	x11-libs/libXScrnSaver
+	x11-libs/libXtst
+	net-print/cups
 	x11-libs/cairo
 	x11-libs/gdk-pixbuf:2
 	x11-libs/gtk+:3
@@ -36,8 +41,14 @@ RDEPEND="
 "
 
 src_install() {
-	dobin oddity nte-cli
-	domenu oddity.desktop
+	dodir /opt/Oddity
+	cp -a . "${ED}/opt/Oddity/" || die
+	fperms 0755 /opt/Oddity/oddity /opt/Oddity/oddity-shell /opt/Oddity/chrome-sandbox
+	for binary in oddity nte-cli oddity-recovery; do
+		dosym -r "/opt/Oddity/${binary}" "/usr/bin/${binary}"
+	done
+	fperms 0755 /opt/Oddity/resources/bin/oddity /opt/Oddity/resources/bin/oddity-backend /opt/Oddity/resources/bin/nte-cli /opt/Oddity/resources/bin/oddity-recovery
+	domenu oddity.desktop oddity-recovery.desktop
 
 	for size in 16 22 24 32 48 64 128 256 512; do
 		newicon -s "${size}" "icons/${size}x${size}.png" oddity.png
